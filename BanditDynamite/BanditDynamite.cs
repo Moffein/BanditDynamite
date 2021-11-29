@@ -17,7 +17,7 @@ namespace BanditDynamite
 {
     [BepInDependency("com.bepis.r2api")]
     [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI), nameof(LoadoutAPI), nameof(PrefabAPI), nameof(SoundAPI), nameof(ProjectileAPI), nameof(EffectAPI))]
-    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.4")]
+    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.5")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     public class BanditDynamite : BaseUnityPlugin
     {
@@ -28,7 +28,7 @@ namespace BanditDynamite
 
         float cbRadius, cbBombletRadius, cbBombletProcCoefficient, cbCooldown;
         int cbBombletCount, cbStock;
-
+        bool disableFalloff = false;
 
         public void Awake()
         {
@@ -71,6 +71,7 @@ namespace BanditDynamite
                         if (pie)
                         {
                             pie.blastRadius *= 2f;
+                            pie.falloffModel = BlastAttack.FalloffModel.None;
                         }
 
                         ProjectileDamage pd = self.gameObject.GetComponent<ProjectileDamage>();
@@ -159,9 +160,10 @@ namespace BanditDynamite
             ClusterBomb.bombletDamageCoefficient = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Bomblet Damage*"), 1.2f, new ConfigDescription("How much damage Dynamite Toss Bomblets deals.")).Value;
             cbBombletRadius = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Bomblet Radius*"), 8f, new ConfigDescription("How large the mini explosions are.")).Value;
             cbBombletProcCoefficient = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Bomblet Proc Coefficient*"), 0.6f, new ConfigDescription("Affects the chance and power of Dynamite Toss Bomblet procs.")).Value;
-            ClusterBomb.baseDuration = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Throw Duration"), 0.4f, new ConfigDescription("How long it takes to throw a Dynamite Bundle.")).Value;
+            ClusterBomb.baseDuration = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Throw Duration"), 0.6f, new ConfigDescription("How long it takes to throw a Dynamite Bundle.")).Value;
             cbCooldown = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Cooldown"), 6f, new ConfigDescription("How long it takes for Dynamite Toss to recharge.")).Value;
             cbStock = base.Config.Bind<int>(new ConfigDefinition("Dynamite", "Stock"), 1, new ConfigDescription("How much Dynamite you start with.")).Value;
+            disableFalloff = base.Config.Bind<bool>(new ConfigDefinition("Dynamite", "Disable Falloff"), false, new ConfigDescription("Disable explosion damage falloff.")).Value;
         }
 
         public void LoadResources()
@@ -199,7 +201,7 @@ namespace BanditDynamite
             sc.contactOffset = 0.01f;
 
             TeamComponent tc = ClusterBombObject.AddComponent<TeamComponent>();
-            tc.hideAllyCardDisplay = false;
+            tc.hideAllyCardDisplay = true;
             ClusterBombObject.AddComponent<SkillLocator>();
 
             CharacterBody cb = ClusterBombObject.AddComponent<CharacterBody>();
@@ -236,7 +238,7 @@ namespace BanditDynamite
 
             ProjectileImpactExplosion pie = ClusterBombObject.GetComponent<ProjectileImpactExplosion>();
             pie.blastRadius = cbRadius;
-            pie.falloffModel = BlastAttack.FalloffModel.None;
+            pie.falloffModel = disableFalloff ? BlastAttack.FalloffModel.None : BlastAttack.FalloffModel.SweetSpot;
             pie.lifetime = 25f;
             pie.lifetimeAfterImpact = 1.5f;
             pie.destroyOnEnemy = true;
@@ -335,7 +337,7 @@ namespace BanditDynamite
 
             ProjectileImpactExplosion pie = ClusterBombletObject.GetComponent<ProjectileImpactExplosion>();
             pie.blastRadius = cbBombletRadius;
-            pie.falloffModel = BlastAttack.FalloffModel.None;
+            pie.falloffModel = disableFalloff ? BlastAttack.FalloffModel.None : BlastAttack.FalloffModel.SweetSpot;
             pie.destroyOnEnemy = false;
             pie.destroyOnWorld = false;
             pie.lifetime = 1.5f;

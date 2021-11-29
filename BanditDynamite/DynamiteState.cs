@@ -36,7 +36,11 @@ namespace EntityStates.Moffein.BanditDynamite
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            if (base.inputBank && base.inputBank.skill2.down)
+            {
+                return InterruptPriority.PrioritySkill;
+            }
+            return InterruptPriority.Skill;
         }
 
         public static GameObject projectilePrefab;
