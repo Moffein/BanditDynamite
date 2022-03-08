@@ -16,13 +16,13 @@ using UnityEngine;
 namespace BanditDynamite
 {
     [BepInDependency("com.bepis.r2api")]
-    [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI), nameof(LoadoutAPI), nameof(PrefabAPI), nameof(SoundAPI), nameof(ProjectileAPI), nameof(EffectAPI))]
-    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.5")]
+    [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI),  nameof(PrefabAPI), nameof(SoundAPI))]
+    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.7")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     public class BanditDynamite : BaseUnityPlugin
     {
         AssetBundle assets;
-        private readonly Shader hotpoo = Resources.Load<Shader>("Shaders/Deferred/hgstandard");
+        private readonly Shader hotpoo = LegacyResourcesAPI.Load<Shader>("Shaders/Deferred/hgstandard");
         GameObject ClusterBombObject;
         GameObject ClusterBombletObject;
 
@@ -136,10 +136,10 @@ namespace BanditDynamite
             clusterBombDef.requiredStock = 1;
             clusterBombDef.stockToConsume = 1;
             clusterBombDef.keywordTokens = new string[] { };
-            LoadoutAPI.AddSkillDef(clusterBombDef);
-            LoadoutAPI.AddSkill(typeof(ClusterBomb));
+            R2API.ContentAddition.AddSkillDef(clusterBombDef);
+            R2API.ContentAddition.AddEntityState<ClusterBomb>(out bool wasAdded);
 
-            GameObject banditObject = Resources.Load<GameObject>("prefabs/characterbodies/Bandit2Body");
+            GameObject banditObject = LegacyResourcesAPI.Load<GameObject>("prefabs/characterbodies/Bandit2Body");
             banditObject.AddComponent<BanditNetworkCommands>();
 
             SkillFamily secondarySkillFamily = banditObject.GetComponent<SkillLocator>().secondary.skillFamily;
@@ -183,10 +183,10 @@ namespace BanditDynamite
 
         private void SetupClusterBomb()
         {
-            ClusterBombObject = R2API.PrefabAPI.InstantiateClone(Resources.Load<GameObject>("prefabs/projectiles/BanditClusterBombSeed"), "MoffeinBanditDynamiteClusterBomb", true);
-            R2API.ProjectileAPI.Add(ClusterBombObject);
+            ClusterBombObject = R2API.PrefabAPI.InstantiateClone(LegacyResourcesAPI.Load<GameObject>("prefabs/projectiles/BanditClusterBombSeed"), "MoffeinBanditDynamiteClusterBomb", true);
+            R2API.ContentAddition.AddProjectile(ClusterBombObject);
 
-            GameObject ClusterBombGhostObject = R2API.PrefabAPI.InstantiateClone(assets.LoadAsset<GameObject>("DynamiteBundle.prefab"), "MoffeinBanditDynamiteClusterBombGhost", true);
+            GameObject ClusterBombGhostObject = R2API.PrefabAPI.InstantiateClone(assets.LoadAsset<GameObject>("DynamiteBundle.prefab"), "MoffeinBanditDynamiteClusterBombGhost", false);
             ClusterBombGhostObject.GetComponentInChildren<MeshRenderer>().material.shader = hotpoo;
             ClusterBombGhostObject.AddComponent<ProjectileGhostController>();
 
@@ -247,6 +247,7 @@ namespace BanditDynamite
             pie.childrenDamageCoefficient = trueBombletDamage;
             pie.blastProcCoefficient = 1f;
             pie.impactEffect = SetupDynamiteExplosion();
+            pie.fireChildren = true;
 
             pie.explosionSoundString = "";
             pie.lifetimeExpiredSound = null;
@@ -302,7 +303,7 @@ namespace BanditDynamite
         }
         private GameObject SetupDynamiteExplosion()
         {
-            GameObject dynamiteExplosion = R2API.PrefabAPI.InstantiateClone(Resources.Load<GameObject>("prefabs/effects/omnieffect/omniexplosionvfx"), "MoffeinBanditDynamiteDynamiteExplosion", false);
+            GameObject dynamiteExplosion = R2API.PrefabAPI.InstantiateClone(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/omnieffect/omniexplosionvfx"), "MoffeinBanditDynamiteDynamiteExplosion", false);
             ShakeEmitter se = dynamiteExplosion.AddComponent<ShakeEmitter>();
             se.shakeOnStart = true;
             se.duration = 0.5f;
@@ -318,15 +319,15 @@ namespace BanditDynamite
             EffectComponent ec = dynamiteExplosion.GetComponent<EffectComponent>();
             ec.soundName = "Play_MoffeinBanditDynamite_explode";
 
-            R2API.EffectAPI.AddEffect(new EffectDef(dynamiteExplosion));
+            R2API.ContentAddition.AddEffect(dynamiteExplosion);
             return dynamiteExplosion;
         }
         private void SetupClusterBomblet()
         {
-            ClusterBombletObject = R2API.PrefabAPI.InstantiateClone(Resources.Load<GameObject>("prefabs/projectiles/BanditClusterGrenadeProjectile"), "MoffeinBanditDynamiteClusterBomblet", true);
-            ProjectileAPI.Add(ClusterBombletObject);
+            ClusterBombletObject = R2API.PrefabAPI.InstantiateClone(LegacyResourcesAPI.Load<GameObject>("prefabs/projectiles/BanditClusterGrenadeProjectile"), "MoffeinBanditDynamiteClusterBomblet", true);
+            R2API.ContentAddition.AddProjectile(ClusterBombletObject);
 
-            GameObject ClusterBombletGhostObject = R2API.PrefabAPI.InstantiateClone(assets.LoadAsset<GameObject>("DynamiteStick.prefab"), "MoffeinBanditDynamiteClusterBombletGhost", true);
+            GameObject ClusterBombletGhostObject = R2API.PrefabAPI.InstantiateClone(assets.LoadAsset<GameObject>("DynamiteStick.prefab"), "MoffeinBanditDynamiteClusterBombletGhost", false);
             ClusterBombletGhostObject.GetComponentInChildren<MeshRenderer>().material.shader = hotpoo;
             ClusterBombletGhostObject.AddComponent<ProjectileGhostController>();
 
@@ -357,12 +358,12 @@ namespace BanditDynamite
 
         private GameObject SetupDynamiteBombletExplosion()
         {
-            GameObject dynamiteExplosion = R2API.PrefabAPI.InstantiateClone(Resources.Load<GameObject>("prefabs/effects/impacteffects/explosionvfx"), "MoffeinBanditDynamiteBombletExplosion", false);
+            GameObject dynamiteExplosion = R2API.PrefabAPI.InstantiateClone(LegacyResourcesAPI.Load<GameObject>("prefabs/effects/impacteffects/explosionvfx"), "MoffeinBanditDynamiteBombletExplosion", false);
 
             EffectComponent ec = dynamiteExplosion.GetComponent<EffectComponent>();
             ec.soundName = "Play_engi_M2_explo";
 
-            EffectAPI.AddEffect(dynamiteExplosion);
+            R2API.ContentAddition.AddEffect(dynamiteExplosion);
             return dynamiteExplosion;
         }
     }
