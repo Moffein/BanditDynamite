@@ -236,6 +236,7 @@ namespace BanditDynamite
 
             ClusterBombObject.AddComponent<AssignDynamiteTeamFilter>();
 
+            //All bombs spawn, but they all spawn inside each other.
             ProjectileImpactExplosion pie = ClusterBombObject.GetComponent<ProjectileImpactExplosion>();
             pie.blastRadius = cbRadius;
             pie.falloffModel = disableFalloff ? BlastAttack.FalloffModel.None : BlastAttack.FalloffModel.SweetSpot;
