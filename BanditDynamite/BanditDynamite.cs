@@ -346,6 +346,7 @@ namespace BanditDynamite
             pie.blastProcCoefficient = cbBombletProcCoefficient;
             pie.explosionSoundString = "";
             pie.impactEffect = SetupDynamiteBombletExplosion();
+            pie.fireChildren = false;
 
             Destroy(ClusterBombletObject.GetComponent<ProjectileStickOnImpact>());
 
