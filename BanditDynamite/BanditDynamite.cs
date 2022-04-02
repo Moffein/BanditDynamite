@@ -16,18 +16,20 @@ using UnityEngine;
 namespace BanditDynamite
 {
     [BepInDependency("com.bepis.r2api")]
-    [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI),  nameof(PrefabAPI), nameof(SoundAPI))]
+    [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI),  nameof(PrefabAPI), nameof(SoundAPI), nameof(DamageAPI))]
     [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.7")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     public class BanditDynamite : BaseUnityPlugin
     {
         AssetBundle assets;
         private readonly Shader hotpoo = LegacyResourcesAPI.Load<Shader>("Shaders/Deferred/hgstandard");
-        GameObject ClusterBombObject;
-        GameObject ClusterBombletObject;
+        public static GameObject ClusterBombObject;
+        public static GameObject ClusterBombletObject;
 
-        float cbRadius, cbBombletRadius, cbBombletProcCoefficient, cbCooldown;
-        int cbBombletCount, cbStock;
+        public static DamageAPI.ModdedDamageType ClusterBombDamage;
+
+        public static float cbRadius, cbBombletRadius, cbBombletProcCoefficient, cbCooldown;
+        public static int cbBombletCount, cbStock;
         bool disableFalloff = false;
 
         public void Awake()
@@ -38,6 +40,8 @@ namespace BanditDynamite
             SetupClusterBomblet();
             RegisterLanguageTokens();
             AddSkill();
+
+            FireBomblets.AddHook();
 
             On.RoR2.HealthComponent.TakeDamage += (orig, self, damageInfo) =>
             {
@@ -183,6 +187,8 @@ namespace BanditDynamite
 
         private void SetupClusterBomb()
         {
+            ClusterBombDamage = DamageAPI.ReserveDamageType();
+
             ClusterBombObject = R2API.PrefabAPI.InstantiateClone(LegacyResourcesAPI.Load<GameObject>("prefabs/projectiles/BanditClusterBombSeed"), "MoffeinBanditDynamiteClusterBomb", true);
             R2API.ContentAddition.AddProjectile(ClusterBombObject);
 
@@ -194,6 +200,8 @@ namespace BanditDynamite
 
             ClusterBombObject.GetComponent<ProjectileController>().ghostPrefab = ClusterBombGhostObject;
 
+            DamageAPI.ModdedDamageTypeHolderComponent mdc = ClusterBombObject.AddComponent<DamageAPI.ModdedDamageTypeHolderComponent>();
+            mdc.Add(ClusterBombDamage);
 
             float trueBombletDamage = ClusterBomb.bombletDamageCoefficient / ClusterBomb.damageCoefficient;
             SphereCollider sc = ClusterBombObject.AddComponent<SphereCollider>();
@@ -248,7 +256,7 @@ namespace BanditDynamite
             pie.childrenDamageCoefficient = trueBombletDamage;
             pie.blastProcCoefficient = 1f;
             pie.impactEffect = SetupDynamiteExplosion();
-            pie.fireChildren = true;
+            pie.fireChildren = false;// true;
 
             pie.explosionSoundString = "";
             pie.lifetimeExpiredSound = null;
