@@ -17,7 +17,7 @@ namespace BanditDynamite
 {
     [BepInDependency("com.bepis.r2api")]
     [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI),  nameof(PrefabAPI), nameof(SoundAPI), nameof(DamageAPI))]
-    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.8")]
+    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.9")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     public class BanditDynamite : BaseUnityPlugin
     {

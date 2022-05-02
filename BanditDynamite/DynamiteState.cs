@@ -20,6 +20,12 @@ namespace EntityStates.Moffein.BanditDynamite
             Util.PlaySound("Play_MoffeinBanditDynamite_toss", base.gameObject);
             if (base.isAuthority)
             {
+                if (base.characterMotor && !base.characterMotor.isGrounded)
+                {
+                    Debug.Log(EntityStates.Bandit2.Weapon.Bandit2FireShiv.shortHopVelocity);
+                    base.characterMotor.velocity = new Vector3(base.characterMotor.velocity.x, Mathf.Max(base.characterMotor.velocity.y, 6), base.characterMotor.velocity.z);   //Bandit2 FireShiv Shorthop Velocity = 6
+                }
+
                 ProjectileManager.instance.FireProjectile(ClusterBomb.projectilePrefab, aimRay.origin, Util.QuaternionSafeLookRotation(aimRay.direction), base.gameObject, this.damageStat * ClusterBomb.damageCoefficient, 0f, Util.CheckRoll(this.critStat, base.characterBody.master), DamageColorIndex.Default, null, -1f);
             }
         }
