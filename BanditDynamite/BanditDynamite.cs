@@ -17,7 +17,7 @@ namespace BanditDynamite
 {
     [BepInDependency("com.bepis.r2api")]
     [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI),  nameof(PrefabAPI), nameof(SoundAPI), nameof(DamageAPI))]
-    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.0.9")]
+    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.1.0")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     public class BanditDynamite : BaseUnityPlugin
     {
@@ -28,6 +28,7 @@ namespace BanditDynamite
 
         public static DamageAPI.ModdedDamageType ClusterBombDamage;
 
+        public static bool dynamiteSpecialCombo = true;
         public static float cbRadius, cbBombletRadius, cbBombletProcCoefficient, cbCooldown;
         public static int cbBombletCount, cbStock;
         bool disableFalloff = false;
@@ -84,6 +85,12 @@ namespace BanditDynamite
                             if (resetCooldown)
                             {
                                 pd.damage *= 2f;
+
+                                if (dynamiteSpecialCombo)
+                                {
+                                    if (damageInfo.damageType.HasFlag(DamageType.ResetCooldownsOnKill)) pd.damageType |= DamageType.ResetCooldownsOnKill;
+                                    if (damageInfo.damageType.HasFlag(DamageType.GiveSkullOnKill)) pd.damageType |= DamageType.GiveSkullOnKill;
+                                }
 
                                 damageInfo.damageType &= ~DamageType.ResetCooldownsOnKill;
                                 damageInfo.damageType &= ~DamageType.GiveSkullOnKill;
@@ -158,6 +165,7 @@ namespace BanditDynamite
 
         private void ReadConfig()
         {
+            dynamiteSpecialCombo = base.Config.Bind<bool>(new ConfigDefinition("Dynamite", "Special Combo"), true, new ConfigDescription("Dynamite inherits the damagetype of Bandit's Special skills when shot by them.")).Value;
             ClusterBomb.damageCoefficient = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Damage*"), 3.9f, new ConfigDescription("How much damage Dynamite Toss deals.")).Value;
             cbRadius = base.Config.Bind<float>(new ConfigDefinition("Dynamite", "Radius*"), 8f, new ConfigDescription("How large the explosion is. Radius is doubled when shot out of the air.")).Value;
             cbBombletCount = base.Config.Bind<int>(new ConfigDefinition("Dynamite", "Bomblet Count*"), 6, new ConfigDescription("How many mini bombs Dynamite Toss releases.")).Value;
