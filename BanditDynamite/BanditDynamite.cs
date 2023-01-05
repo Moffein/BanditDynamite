@@ -17,7 +17,7 @@ namespace BanditDynamite
 {
     [BepInDependency("com.bepis.r2api")]
     [R2API.Utils.R2APISubmoduleDependency(nameof(LanguageAPI),  nameof(PrefabAPI), nameof(SoundAPI), nameof(DamageAPI))]
-    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.1.0")]
+    [BepInPlugin("com.Moffein.BanditDynamite", "Bandit Dynamite", "1.1.1")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     public class BanditDynamite : BaseUnityPlugin
     {
@@ -53,15 +53,15 @@ namespace BanditDynamite
                 if (ad)
                 {
                     isDynamiteBundle = true;
-                }
 
-                CharacterBody attackerCB = null;
-                if (damageInfo.attacker)
-                {
-                    attackerCB = damageInfo.attacker.GetComponent<CharacterBody>();
-                    if (attackerCB)
+                    CharacterBody attackerCB = null;
+                    if (damageInfo.attacker)
                     {
-                        banditAttacker = attackerCB.bodyIndex == BodyCatalog.FindBodyIndex("Bandit2Body");
+                        attackerCB = damageInfo.attacker.GetComponent<CharacterBody>();
+                        if (attackerCB)
+                        {
+                            banditAttacker = attackerCB.bodyIndex == BodyCatalog.FindBodyIndex("Bandit2Body");
+                        }
                     }
                 }
 
@@ -149,6 +149,7 @@ namespace BanditDynamite
             clusterBombDef.keywordTokens = new string[] { };
             R2API.ContentAddition.AddSkillDef(clusterBombDef);
             R2API.ContentAddition.AddEntityState<ClusterBomb>(out bool wasAdded);
+            (clusterBombDef as ScriptableObject).name = clusterBombDef.skillName;
 
             GameObject banditObject = LegacyResourcesAPI.Load<GameObject>("prefabs/characterbodies/Bandit2Body");
             banditObject.AddComponent<BanditNetworkCommands>();

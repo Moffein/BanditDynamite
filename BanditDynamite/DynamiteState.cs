@@ -22,7 +22,6 @@ namespace EntityStates.Moffein.BanditDynamite
             {
                 if (base.characterMotor && !base.characterMotor.isGrounded)
                 {
-                    Debug.Log(EntityStates.Bandit2.Weapon.Bandit2FireShiv.shortHopVelocity);
                     base.characterMotor.velocity = new Vector3(base.characterMotor.velocity.x, Mathf.Max(base.characterMotor.velocity.y, 6), base.characterMotor.velocity.z);   //Bandit2 FireShiv Shorthop Velocity = 6
                 }
 
