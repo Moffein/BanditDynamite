@@ -20,7 +20,7 @@ namespace BanditDynamite.Components
 				{
 					teamComponent.teamIndex = teamFilter.teamIndex;
 				}*/
-				teamComponent.teamIndex = TeamIndex.Neutral;
+				teamComponent.teamIndex = TeamIndex.None;
 			}
 		}
 		public bool fired = false;
